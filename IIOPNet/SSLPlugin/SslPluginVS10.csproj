@@ -29,7 +29,8 @@
     <Optimize>True</Optimize>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <DefineConstants>UnitTest</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <OutputPath>..\bin\Debug\</OutputPath>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>

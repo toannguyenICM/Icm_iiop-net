@@ -219,7 +219,6 @@
     <Compile Include="SymbolTable.cs" />
     <Compile Include="SymbolTypedef.cs" />
     <Compile Include="SymbolValue.cs" />
-    <Compile Include="Tests.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="TokenMgrError.cs" />
     <Compile Include="TypeManager.cs" />

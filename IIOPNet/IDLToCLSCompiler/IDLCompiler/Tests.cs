@@ -1,4 +1,4 @@
-/* Tests.cs
+﻿/* Tests.cs
  * 
  * Project: IIOP.NET
  * IDLToCLSCompiler
@@ -51,12 +51,6 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
     /// </summary>
     [TestFixture]
     public class CLSForIDLGenerationTest : CompilerTestsBase {
-            
-        #region IFields
-
-
-        #endregion
-        #region IMethods
 
         [SetUp]
         public void SetupEnvironment() {
@@ -718,7 +712,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                 // idl:
 
                 writer.WriteLine(@"
-                    #pragma prefix ""xxx1""
+#pragma prefix ""xxx1""
                     module testmod {
                         interface Test1 {};
                     };
@@ -748,7 +742,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                         interface Test1 {};
                     };
 
-                    #pragma prefix ""xxx1""
+#pragma prefix ""xxx1""
                     module testmod2 {
                         interface Test2 {};
                     };
@@ -778,7 +772,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                 // idl:
 
                 writer.WriteLine(@"
-                    #pragma prefix ""xxx1""
+#pragma prefix ""xxx1""
                     interface Test1 {};
                 ");
 
@@ -806,20 +800,20 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                         interface Test1 {};
                     };
 
-                    #pragma prefix ""xxx1""
+#pragma prefix ""xxx1""
                     module testmod2 {
                         interface Test2 {};
                     };
                     interface Test2a {};
 
-                    #pragma prefix ""yyy2""
-                    #pragma prefix ""xxx2""
+#pragma prefix ""yyy2""
+#pragma prefix ""xxx2""
                     module testmod3 {
                         interface Test3 {};
                     };
                     interface Test3a {};
 
-                    #pragma prefix """"
+#pragma prefix """"
                     module testmod4 {
                         interface Test4 {};
                     };
@@ -1413,12 +1407,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if union is correctly created
             Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
         }
-        
-        #endregion
-        
     }
         
 }
-
 
 #endif
