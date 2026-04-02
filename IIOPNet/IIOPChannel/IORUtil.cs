@@ -1,4 +1,4 @@
-﻿/* IORUtil.cs
+/* IORUtil.cs
  * 
  * Project: IIOP.NET
  * IIOPChannel
@@ -230,7 +230,7 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="mbr">the object for which to get the object key</param>
         /// <returns></returns>
         internal static byte[] GetObjectKeyForObj(MarshalByRefObject mbr) {
-            string objectUri = RemotingServices.GetObjectUri(mbr);
+            string objectUri = ObjectRegistry.GetObjectUri(mbr);
             if (objectUri == null) {
                 throw new INTERNAL(57, CompletionStatus.Completed_MayBe);
             }
@@ -280,40 +280,24 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="obj"></param>
         /// <returns></returns>
         internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj, Type forType, bool marshalUsingForType) {
-            Console.WriteLine("Marshalling using for type: {0}", marshalUsingForType);
-            ObjRef objRef = 
-                marshalUsingForType ? RemotingServices.Marshal(obj, null, forType)
-                                    : RemotingServices.Marshal(obj); // make sure, the object is marshalled and get obj-ref
-            byte[] objectKey = GetObjectKeyForUri(objRef.URI);
-            IiopChannelData serverData = GetIiopChannelData(objRef);
-            if (serverData != null) {
-                string host = serverData.HostName;
-                int port = serverData.Port;
-                if ((objectKey == null) || (host == null)) {
-                    // the objRef: " + refToTarget + ", uri: " +
-                    // refToTarget.URI + is not serialisable, because connection data is missing
-                    // hostName=host, objectKey=objectKey
-                    throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
+            // Try ObjectRegistry first (no Remoting dependency)
+            if (ObjectRegistry.IsChannelRegistered) {
+                string regUri = ObjectRegistry.GetObjectUri(obj);
+                if (regUri == null) {
+                    regUri = ObjectRegistry.Marshal(obj);
                 }
-                string repositoryID = forType == ReflectionHelper.MarshalByRefObjectType
-                    ? "" // CORBA::Object has "" repository id
-                    : Repository.GetRepositoryID(forType);
-                // this server support GIOP 1.2 --> create an GIOP 1.2 profile
-                InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
-                                                                      (ushort)port, objectKey);
-                // add additional tagged components according to the channel options, e.g. for SSL
-                profile.AddTaggedComponents(serverData.AdditionalTaggedComponents);
-                // add additional tagged components according to registered interceptors:
-                AddProfileComponentsFromIorInterceptors(profile);
-                
-                Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
-                return ior;
-            } else {
-                Debug.WriteLine("ERROR: no server-channel information found!");
-                Debug.WriteLine("Please make sure, that an IIOPChannel has been created with specifying a listen port number (0 for automatic)!");
-                Debug.WriteLine("e.g. IIOPChannel chan = new IIOPChannel(0);");
-                throw new INTERNAL(1960, CompletionStatus.Completed_MayBe);
+                byte[] regObjKey = GetObjectKeyForUri(regUri);
+                string regHost = ObjectRegistry.HostName;
+                int regPort = ObjectRegistry.Port;
+                string regRepId = forType == ReflectionHelper.MarshalByRefObjectType
+                    ? "" : Repository.GetRepositoryID(forType);
+                InternetIiopProfile regProfile = new InternetIiopProfile(new GiopVersion(1, 2), regHost,
+                                                                              (ushort)regPort, regObjKey);
+                AddProfileComponentsFromIorInterceptors(regProfile);
+                return new Ior(regRepId, new IorProfile[] { regProfile });
             }
+            // ObjectRegistry not initialized — cannot create IOR
+            throw new INTERNAL(1960, CompletionStatus.Completed_MayBe);
         }
         
         /// <summary>gets the IIOPchannel-data from an ObjRef.</summary>

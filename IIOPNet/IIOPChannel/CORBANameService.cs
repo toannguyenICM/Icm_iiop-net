@@ -264,47 +264,11 @@ namespace omg.org.CosNaming {
         }
 
         private static MarshalByRefObject GetObjectRegisteredAtUri(string uri, NameComponent[] nameComponents) {
-            // this is not nice, because it does circument internal on IdentityHolder-class
-            Debug.WriteLine("get registeredObject: " + uri);
-            Assembly remotingAssembly = Assembly.Load("mscorlib");
-            if (remotingAssembly == null) {
-                throw new INTERNAL(16001, CompletionStatus.Completed_MayBe);
+            MarshalByRefObject registryObj = Ch.Elca.Iiop.ObjectRegistry.ResolveUri(uri);
+            if (registryObj != null) {
+                return registryObj;
             }
-            Type identityHolderType = remotingAssembly.GetType("System.Runtime.Remoting.IdentityHolder");
-            if (identityHolderType == null) {
-                throw new INTERNAL(16002, CompletionStatus.Completed_MayBe);
-            }
-            // identityHolder class, manages the published remote objects
-            // get the resolveUri-method to get the Identity for the URI
-            MethodInfo resolveIdMethod = identityHolderType.GetMethod("ResolveIdentity",
-                                                                      BindingFlags.Static | BindingFlags.NonPublic);
-            if (resolveIdMethod == null) {
-                throw new INTERNAL(16003, CompletionStatus.Completed_MayBe);
-            }
-            
-            // now call resolve-method:
-            object identity = resolveIdMethod.Invoke(null, new object[] { uri } );
-            if (identity == null) {
-                throw new NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents);
-            }
-
-            // now get the object from the identity
-            Type identityType = remotingAssembly.GetType("System.Runtime.Remoting.Identity");
-            if (identityType == null) {
-                throw new INTERNAL(16004, CompletionStatus.Completed_MayBe);
-            }
-            
-            // property TPOrObject holds the object, therefor access this property
-            PropertyInfo tpOrObjProp = identityType.GetProperty("TPOrObject",
-                                                                BindingFlags.Instance | BindingFlags.NonPublic);
-            if (tpOrObjProp == null) {
-                throw new INTERNAL(16005, CompletionStatus.Completed_MayBe);
-            }
-            MarshalByRefObject result = (MarshalByRefObject)tpOrObjProp.GetValue(identity, null);
-            if (result == null) {
-                throw new INTERNAL(16006, CompletionStatus.Completed_MayBe);
-            }
-            return result;
+            throw new NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents);
         }
 
         /// <summary>create a name for the name-components</summary>

@@ -133,6 +133,7 @@
     <Compile Include="ArgumentsSerializer.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="IORUtil.cs" />
+    <Compile Include="ObjectRegistry.cs" />
     <Compile Include="SerializationOrderFieldinfoComparer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

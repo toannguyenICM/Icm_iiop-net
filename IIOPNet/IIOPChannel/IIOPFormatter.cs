@@ -227,7 +227,7 @@ namespace Ch.Elca.Iiop {
         /// <summary>if compatibility is not checkable with type information included in
         /// IOR, call _is_a method to check.</summary>
         private bool CheckAssignableRemote(Type formal, string url) {
-            IObject proxy = (IObject)RemotingServices.Connect(ReflectionHelper.IObjectType, url);
+            IObject proxy = (IObject)ObjectRegistry.CreateProxyFromIor(ReflectionHelper.IObjectType, url);
             return proxy._is_a(Repository.GetRepositoryID(formal));
         }
 

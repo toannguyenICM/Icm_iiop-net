@@ -96,7 +96,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         /// <summary>checks if this it's a one way message</summary>
         internal static bool IsOneWayCall(IMethodCallMessage msg) {
-            return RemotingServices.IsOneWay(msg.MethodBase);
+            return ObjectRegistry.IsOneWay(msg.MethodBase);
         }
  
         /// <summary>

@@ -412,7 +412,7 @@ namespace omg.org.CORBA
         private bool IsProxy(object obj)
         {
             MarshalByRefObject mbrProxy = obj as MarshalByRefObject;
-            return ((mbrProxy != null) && (RemotingServices.IsTransparentProxy(mbrProxy)));
+            return ((mbrProxy != null) && (!ObjectRegistry.IsLocalObject(mbrProxy)));
         }
 
         private void CheckIsProxy(object obj)
@@ -441,7 +441,7 @@ namespace omg.org.CORBA
             { // type is known
                 type = ior.Type;
             } // if not known, use MarshalByRefObject
-            return RemotingServices.Connect(type, iorString);
+            return ObjectRegistry.CreateProxyFromIor(type, iorString);
         }
 
         /// <summary>takes a proxy and returns the IOR / corbaloc / ...</summary>
@@ -452,10 +452,10 @@ namespace omg.org.CORBA
             {
                 throw new BAD_PARAM(265, CompletionStatus.Completed_Yes);
             }
-            if (RemotingServices.IsTransparentProxy(mbr))
+            if (!ObjectRegistry.IsLocalObject(mbr))
             {
 
-                string uri = RemotingServices.GetObjectUri(mbr);
+                string uri = ObjectRegistry.GetObjectUri(mbr);
                 CheckIsValidUri(uri);
                 if (IiopUrlUtil.IsIorString(uri))
                 {
@@ -711,9 +711,9 @@ namespace omg.org.CORBA
         private bool IsAssignableRemote(object proxy, string repId)
         {
             // create a new proxy to the same url to prevent issues with type compatibility to IObject.
-            string proxyUrl = RemotingServices.GetObjectUri((MarshalByRefObject)proxy);
+            string proxyUrl = ObjectRegistry.GetObjectUri((MarshalByRefObject)proxy);
             IObject objProxy =
-                (IObject)RemotingServices.Connect(ReflectionHelper.IObjectType, proxyUrl);
+                (IObject)ObjectRegistry.CreateProxyFromIor(ReflectionHelper.IObjectType, proxyUrl);
             return objProxy._is_a(repId);
         }
 

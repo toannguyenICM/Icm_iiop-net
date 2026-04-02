@@ -85,7 +85,7 @@ namespace Ch.Elca.Iiop.Services {
                                                     host, port, 
                                                     InitialCOSNamingContextImpl.INITIAL_NAMING_OBJ_NAME);
                 
-                    result = (NamingContext)RemotingServices.Connect(typeof(NamingContext), 
+                    result = (NamingContext)ObjectRegistry.CreateProxyFromIor(typeof(NamingContext), 
                                                                      corbaLoc);
                     m_initalServices.Add(nsKey, result);
                 } else {
@@ -159,7 +159,7 @@ namespace Ch.Elca.Iiop.Services {
                                                  new IorProfile[] { initServiceProfile });
                     
                     string iorString = initServiceIor.ToString();                    
-                    initService = (CORBAInitService)RemotingServices.Connect(typeof(CORBAInitService), 
+                    initService = (CORBAInitService)ObjectRegistry.CreateProxyFromIor(typeof(CORBAInitService), 
                                                                              iorString); // CORBAInitService type not verifiable remote -> make sure that it's possible to verify locally
                     m_initalServices.Add(key, initService);
                 } else {

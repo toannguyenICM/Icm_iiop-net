@@ -91,7 +91,7 @@ namespace Ch.Elca.Iiop {
                 if (s_standardOpsH == null) {
                     s_standardOpsH = new StandardCorbaOps();
                     // publish this
-                    RemotingServices.Marshal(s_standardOpsH, WELLKNOWN_URI);
+                    Ch.Elca.Iiop.ObjectRegistry.Marshal(s_standardOpsH, WELLKNOWN_URI);
                 }
             }
         }
@@ -134,7 +134,7 @@ namespace Ch.Elca.Iiop {
         /// <param name="repositoryId"></param>
         /// <returns></returns>
         public bool is_a(string objectUri, string repositoryId) {
-            Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
+            Type serverType = Ch.Elca.Iiop.ObjectRegistry.GetServerTypeForUri(objectUri);
             if (serverType == null) {
                 throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
             }           
@@ -157,7 +157,7 @@ namespace Ch.Elca.Iiop {
         /// <param name="repositoryId"></param>
         /// <returns></returns>
         public bool non_existent(string objectUri) {
-            Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
+            Type serverType = Ch.Elca.Iiop.ObjectRegistry.GetServerTypeForUri(objectUri);
             return (serverType == null);
         }
 

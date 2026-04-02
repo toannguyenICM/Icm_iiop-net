@@ -1138,7 +1138,7 @@ namespace Ch.Elca.Iiop
         }
 
         private void SetupChannelData(string hostName, int port, omg.org.IOP.Codec codec,
-                                      TaggedComponent[] additionalComponents)
+                                       TaggedComponent[] additionalComponents)
         {
             IiopChannelData newChannelData = new IiopChannelData(hostName, port);
             newChannelData.AddAdditionalTaggedComponent(
@@ -1148,6 +1148,7 @@ namespace Ch.Elca.Iiop
                 newChannelData.AddAdditionalTaggedComponents(additionalComponents);
             }
             m_channelData = newChannelData;
+            ObjectRegistry.RegisterChannel(hostName, port);
         }
 
         #region Implementation of IChannelReceiver

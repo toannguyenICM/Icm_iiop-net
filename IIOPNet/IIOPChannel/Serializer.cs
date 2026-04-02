@@ -450,9 +450,9 @@ namespace Ch.Elca.Iiop.Marshalling {
             // is a proxy --> create IOR from url
             //                url possibilities: IOR:--hex-- ; iiop://addr/key ; corbaloc::addr:key ; ...
             Ior ior = null;
-            if (RemotingServices.IsTransparentProxy(target)) {
+            if (!ObjectRegistry.IsLocalObject(target)) {
                 // proxy
-                string url = RemotingServices.GetObjectUri(target);
+                string url = ObjectRegistry.GetObjectUri(target);
                 Debug.WriteLine("marshal object reference (from a proxy) with url " + url);
                 Type actualType = actual.GetType();
                 if (actualType.Equals(ReflectionHelper.MarshalByRefObjectType) &&
@@ -503,7 +503,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             // create a proxy
             //Console.WriteLine("Type for IOR with URL {0} is {1} ({2}), interface type: {3}",
             //                  url, ior.Type, ior.TypID, interfaceType);
-            object proxy = RemotingServices.Connect(interfaceType, url);
+            object proxy = ObjectRegistry.CreateProxyFromIor(interfaceType, url);
             //Console.WriteLine("Connected to proxy of type {0} with type {1} from {2}",
             //                  proxy.GetType(), interfaceType, new StackTrace());
             return proxy;

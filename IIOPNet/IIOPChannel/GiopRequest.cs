@@ -135,7 +135,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// </summary>
         internal bool IsOneWayCall {
             get{
-                return RemotingServices.IsOneWay(m_requestMessage.MethodBase);
+                return ObjectRegistry.IsOneWay(m_requestMessage.MethodBase);
             }
         }        
         
@@ -894,7 +894,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                                 
             if (!StandardCorbaOps.CheckIfStandardOp(RequestMethodName)) {
                 regularOp = true; // non-pseude op
-                serverType = RemotingServices.GetServerTypeForUri(calledUri);
+                serverType = Ch.Elca.Iiop.ObjectRegistry.GetServerTypeForUri(calledUri);
                 if (serverType == null) {
                     throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
                 }
