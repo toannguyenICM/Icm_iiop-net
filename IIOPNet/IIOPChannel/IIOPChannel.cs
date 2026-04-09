@@ -1074,12 +1074,19 @@ namespace Ch.Elca.Iiop
             {
                 m_providerChain = new IiopServerFormatterSinkProvider();
             }
+            // Append ObjectRegistryDispatchSinkProvider as the terminal dispatch sink.
+            // This replaces Remoting's built-in StackBuilderSink and dispatches incoming
+            // CORBA requests to servant objects registered via ObjectRegistry.Marshal().
+            IServerChannelSinkProvider lastProv = m_providerChain;
+            while (lastProv.Next != null) { lastProv = lastProv.Next; }
+            lastProv.Next = new ObjectRegistryDispatchSinkProvider();
+
             GiopMessageHandler messageHandler =
                 new GiopMessageHandler(argumentSerializerFactory,
                                        m_headerFlags, m_interceptionOptions);
             ConfigureSinkProviderChain(messageHandler);
 
-            IServerChannelSink sinkChain = ChannelServices.CreateServerChannelSinkChain(m_providerChain, this);
+            IServerChannelSink sinkChain = m_providerChain.CreateSink(this);
             m_transportSink = new IiopServerTransportSink(sinkChain);
 
             if (m_bidirConnectionManager != null)

@@ -39,13 +39,18 @@ namespace Ch.Elca.Iiop {
         private static int s_port;
         private static bool s_channelRegistered;
 
-        /// <summary>Registers the active server channel info for IOR construction.</summary>
+        /// <summary>Registers the active server channel info for IOR construction.
+        /// Also eagerly resolves RemotingServices methods via reflection to avoid
+        /// cold-start race conditions when the first CORBA call arrives.</summary>
         public static void RegisterChannel(string hostName, int port) {
             lock (s_lock) {
                 s_hostName = hostName;
                 s_port = port;
                 s_channelRegistered = true;
             }
+            // Eagerly resolve RemotingServices at channel startup rather than
+            // lazily on first proxy creation, to avoid cold-start timing issues.
+            EnsureRemotingResolved();
         }
 
         public static bool IsChannelRegistered {
@@ -134,7 +139,12 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        /// <summary>Gets the URI for a registered object. Returns null if not found.</summary>
+        /// <summary>
+        /// Gets the URI for a registered object.
+        /// First checks ObjectRegistry, then falls back to RemotingServices.GetObjectUri
+        /// via reflection for remote proxies (created by RemotingServices.Connect).
+        /// Returns null if not found.
+        /// </summary>
         public static string GetObjectUri(MarshalByRefObject obj) {
             lock (s_lock) {
                 foreach (var kvp in s_objects) {
@@ -142,8 +152,17 @@ namespace Ch.Elca.Iiop {
                         return kvp.Key;
                     }
                 }
-                return null;
             }
+            // Fall back to RemotingServices.GetObjectUri for remote proxies
+            EnsureRemotingResolved();
+            if (s_remotingGetObjectUri != null) {
+                try {
+                    return (string)s_remotingGetObjectUri.Invoke(null, new object[] { obj });
+                } catch {
+                    // Swallow on platforms where Remoting is unavailable
+                }
+            }
+            return null;
         }
 
         /// <summary>Returns true if the object is registered in our registry.</summary>
@@ -162,11 +181,21 @@ namespace Ch.Elca.Iiop {
         }
 
         /// <summary>
-        /// Returns true if the object is a local server object (registered in ObjectRegistry).
-        /// Returns false if it's a remote proxy or unknown.
-        /// Replaces the inverse of RemotingServices.IsTransparentProxy().
+        /// Returns true if the object is a local server object (not a remote proxy).
+        /// Returns false if it's a remote proxy.
+        /// Uses RemotingServices.IsTransparentProxy via reflection on .NET Framework;
+        /// falls back to checking ObjectRegistry on .NET Core.
         /// </summary>
         public static bool IsLocalObject(MarshalByRefObject obj) {
+            EnsureRemotingResolved();
+            if (s_remotingIsTransparentProxy != null) {
+                try {
+                    bool isProxy = (bool)s_remotingIsTransparentProxy.Invoke(null, new object[] { obj });
+                    return !isProxy;
+                } catch {
+                    // Fall through to dictionary check
+                }
+            }
             return IsRegistered(obj);
         }
 
@@ -189,7 +218,9 @@ namespace Ch.Elca.Iiop {
         private static MethodInfo s_remotingMarshal;
         private static MethodInfo s_remotingDisconnect;
         private static MethodInfo s_remotingConnect;
-        private static bool s_remotingResolved;
+        private static MethodInfo s_remotingGetObjectUri;
+        private static MethodInfo s_remotingIsTransparentProxy;
+        private static volatile bool s_remotingResolved;
         private static readonly object s_connectLock = new object();
         private static ICorbaProxyFactory s_proxyFactory;
 
@@ -211,6 +242,10 @@ namespace Ch.Elca.Iiop {
                         new Type[] { typeof(MarshalByRefObject) });
                     s_remotingConnect = remotingServicesType.GetMethod("Connect",
                         new Type[] { typeof(Type), typeof(string) });
+                    s_remotingGetObjectUri = remotingServicesType.GetMethod("GetObjectUri",
+                        new Type[] { typeof(MarshalByRefObject) });
+                    s_remotingIsTransparentProxy = remotingServicesType.GetMethod("IsTransparentProxy",
+                        new Type[] { typeof(object) });
                 }
             }
         }
