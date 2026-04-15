@@ -29,9 +29,7 @@
 
 
 using System;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using System.Net;
 using System.Collections;
 using System.Diagnostics;
@@ -1401,8 +1399,7 @@ namespace Ch.Elca.Iiop
 namespace Ch.Elca.Iiop.Tests
 {
 
-    using System.Runtime.Remoting.Channels;
-    using System.Runtime.Remoting;
+    using Ch.Elca.Iiop.Remoting;
     using System.IO;
     using NUnit.Framework;
     using Ch.Elca.Iiop.Services;

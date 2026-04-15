@@ -3,10 +3,10 @@
 // to servant objects registered via ObjectRegistry.Marshal().
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 
 namespace Ch.Elca.Iiop {
 
@@ -57,37 +57,116 @@ namespace Ch.Elca.Iiop {
 
             try {
                 string uri = mcm.Uri;
+
+                // Check if this is a standard CORBA operation (e.g. _is_a, _non_existent).
+                // These are routed to the StandardCorbaOps singleton, and the actual
+                // implementation method has an extra objectUri parameter prepended.
+                bool isStandardOp = false;
+                object isStdProp = requestMsg.Properties[
+                    Ch.Elca.Iiop.MessageHandling.SimpleGiopMsg.IS_STANDARD_CORBA_OP_KEY];
+                if (isStdProp is bool) {
+                    isStandardOp = (bool)isStdProp;
+                }
+
                 MarshalByRefObject servant = ObjectRegistry.ResolveUri(uri);
                 if (servant == null) {
                     throw new omg.org.CORBA.OBJECT_NOT_EXIST(0,
                         omg.org.CORBA.CompletionStatus.Completed_No);
                 }
 
-                // Find the method on the actual servant type.
-                // mcm.MethodBase may be from the interface type; we need the servant's concrete method.
-                MethodInfo method = GetTargetMethod(servant, mcm);
-                if (method == null) {
-                    throw new omg.org.CORBA.BAD_OPERATION(0,
-                        omg.org.CORBA.CompletionStatus.Completed_No);
+                MethodInfo method;
+                object[] invokeArgs;
+
+                if (isStandardOp) {
+                    // For standard CORBA ops, the GIOP deserializer has already:
+                    // 1. Rerouted the URI to StandardCorbaOps.WELLKNOWN_URI
+                    // 2. Resolved the method to the internal implementation (e.g. is_a)
+                    // 3. Prepended the original object URI as the first argument
+                    //    via AdaptArgsForStandardOp in GiopMessageBodySerializer
+                    // So mcm.Args already contains [objectUri, ...idlArgs].
+                    // Use the IDL method name (e.g. "_is_a") for the lookup, not
+                    // mcm.MethodName which is the internal mapped name (e.g. "is_a").
+                    string idlMethodName = (string)requestMsg.Properties[
+                        Ch.Elca.Iiop.MessageHandling.SimpleGiopMsg.IDL_METHOD_NAME_KEY]
+                        ?? mcm.MethodName;
+                    method = StandardCorbaOps.GetMethodToCallForStandardMethod(idlMethodName);
+                    if (method == null) {
+                        throw new omg.org.CORBA.BAD_OPERATION(0,
+                            omg.org.CORBA.CompletionStatus.Completed_No);
+                    }
+                    invokeArgs = mcm.Args ?? new object[0];
+                } else {
+                    // Regular operation — find the method on the servant type
+                    method = GetTargetMethod(servant, mcm);
+                    if (method == null) {
+                        throw new omg.org.CORBA.BAD_OPERATION(0,
+                            omg.org.CORBA.CompletionStatus.Completed_No);
+                    }
+                    object[] args = mcm.Args;
+                    invokeArgs = new object[args.Length];
+                    Array.Copy(args, invokeArgs, args.Length);
                 }
 
-                // Invoke the servant method
-                object[] args = mcm.Args;
-                // Copy args so we can capture out/ref parameters
-                object[] argsCopy = new object[args.Length];
-                Array.Copy(args, argsCopy, args.Length);
+                object returnValue = method.Invoke(servant, invokeArgs);
 
-                object returnValue = method.Invoke(servant, argsCopy);
+                // Extract only out/ref args for the ReturnMessage.
+                // The GIOP serializer expects OutArgs to contain only out/ref
+                // parameter values, indexed sequentially from the IDL method's
+                // perspective (not including the injected objectUri for standard ops).
+                ParameterInfo[] calledMethodParams = (mcm.MethodBase as MethodInfo ?? method).GetParameters();
+                object[] outArgs;
+                if (isStandardOp) {
+                    // Standard ops have no out/ref params in the IDL signature
+                    outArgs = new object[0];
+                } else {
+                    outArgs = ExtractOutArgs(calledMethodParams, invokeArgs);
+                }
 
-                responseMsg = new ReturnMessage(returnValue, argsCopy,
-                    argsCopy.Length, mcm.LogicalCallContext, mcm);
+                responseMsg = new ReturnMessage(returnValue, outArgs,
+                    outArgs.Length, mcm.LogicalCallContext, mcm);
             } catch (TargetInvocationException tie) {
-                responseMsg = new ReturnMessage(tie.InnerException ?? tie, mcm);
+                Exception actual = tie.InnerException ?? tie;
+                string msg = string.Format(
+                    "ObjectRegistryDispatchSink: TargetInvocationException dispatching {0}.{1} on {2}:\n{3}",
+                    mcm.TypeName, mcm.MethodName, mcm.Uri, actual);
+                Trace.WriteLine(msg);
+                Console.Error.WriteLine(msg);
+                responseMsg = new ReturnMessage(actual, mcm);
             } catch (Exception ex) {
+                string msg = string.Format(
+                    "ObjectRegistryDispatchSink: Exception dispatching {0}.{1} on {2}:\n{3}",
+                    mcm.TypeName, mcm.MethodName, mcm.Uri, ex);
+                Trace.WriteLine(msg);
+                Console.Error.WriteLine(msg);
                 responseMsg = new ReturnMessage(ex, mcm);
             }
 
             return ServerProcessing.Complete;
+        }
+
+        /// <summary>
+        /// Extracts only the out/ref parameter values from the full args array.
+        /// The GIOP response serializer indexes out args sequentially (0, 1, 2...)
+        /// and expects only out/ref values, not all parameter values.
+        /// </summary>
+        private static object[] ExtractOutArgs(ParameterInfo[] methodParams, object[] allArgs) {
+            int outCount = 0;
+            for (int i = 0; i < methodParams.Length; i++) {
+                if (methodParams[i].IsOut || methodParams[i].ParameterType.IsByRef) {
+                    outCount++;
+                }
+            }
+            if (outCount == 0) {
+                return new object[0];
+            }
+            object[] outArgs = new object[outCount];
+            int outIdx = 0;
+            for (int i = 0; i < methodParams.Length; i++) {
+                if (methodParams[i].IsOut || methodParams[i].ParameterType.IsByRef) {
+                    outArgs[outIdx++] = allArgs[i];
+                }
+            }
+            return outArgs;
         }
 
         /// <summary>

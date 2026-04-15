@@ -29,7 +29,7 @@
 
 using System;
 using System.Collections;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Interception;
 using omg.org.IOP;

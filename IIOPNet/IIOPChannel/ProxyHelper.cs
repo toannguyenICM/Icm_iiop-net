@@ -29,7 +29,7 @@
 
 
 using System;
-using System.Runtime.Remoting;
+using Ch.Elca.Iiop.Remoting;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;

@@ -28,9 +28,7 @@
  */
 
 using System;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using System.Collections;
 using System.IO;
 using System.Diagnostics;
@@ -132,7 +130,7 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
-        public System.Runtime.Remoting.Messaging.IMessageSink NextSink {
+        public IMessageSink NextSink {
             get {
                 throw new NotSupportedException();
             } // this sink serialises the message, therefore no other message sinks possible
@@ -839,7 +837,7 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
-        public System.Runtime.Remoting.Channels.IServerChannelSinkProvider Next {
+        public IServerChannelSinkProvider Next {
             get {
                 return m_nextProvider;
             }

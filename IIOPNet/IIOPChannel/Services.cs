@@ -32,8 +32,7 @@ using System.Collections;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Idl;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using Ch.Elca.Iiop.CorbaObjRef;
 
 

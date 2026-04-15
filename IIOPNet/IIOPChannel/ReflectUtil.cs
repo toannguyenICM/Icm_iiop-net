@@ -63,7 +63,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_stringValueAttrType = typeof(StringValueAttribute);
         private static Type s_fromIdlNameAttributeType = typeof(FromIdlNameAttribute);
         private static Type s_throwsIdlExceptionAttributeType = typeof(ThrowsIdlExceptionAttribute);
-        private static Type s_oneWayAttributeType = typeof(System.Runtime.Remoting.Messaging.OneWayAttribute);
+        private static Type s_oneWayAttributeType = Type.GetType("System.Runtime.Remoting.Messaging.OneWayAttribute, mscorlib", false);
         private static Type s_iOrderedAttributeType = typeof(IOrderedAttribute);
         private static Type s_contextElementAttributeType = typeof(ContextElementAttribute);
         private static Type s_supportedInterfaceAttributeType = typeof(SupportedInterfaceAttribute);
@@ -244,7 +244,7 @@ namespace Ch.Elca.Iiop.Util {
             }
         }
         
-        /// <summary>caches typeof(System.Runtime.Remoting.Messaging.OneWayAttribute)</summary>
+        /// <summary>caches Type.GetType("System.Runtime.Remoting.Messaging.OneWayAttribute, mscorlib", false)</summary>
         public static Type OneWayAttributeType {
             get {
                 return s_oneWayAttributeType;

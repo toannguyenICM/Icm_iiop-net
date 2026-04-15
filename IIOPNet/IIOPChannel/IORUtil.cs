@@ -29,7 +29,7 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.Remoting;
+using Ch.Elca.Iiop.Remoting;
 using System.Text;
 using System.Threading;
 using Ch.Elca.Iiop.CorbaObjRef;
@@ -301,6 +301,9 @@ namespace Ch.Elca.Iiop.Util {
         }
         
         /// <summary>gets the IIOPchannel-data from an ObjRef.</summary>
+        /// <remarks>Dead code — ObjRef is not available without System.Runtime.Remoting.
+        /// This method was never called from production code.</remarks>
+        /*
         private static IiopChannelData GetIiopChannelData(ObjRef objRef) {
             IChannelInfo info = objRef.ChannelInfo;
             if ((info == null) || (info.ChannelData == null)) {
@@ -316,6 +319,7 @@ namespace Ch.Elca.Iiop.Util {
             // no IIOPChannelData found
             return null;
         }
+        */
         
         private static void AddProfileComponentsFromIorInterceptors(InternetIiopProfile profile) {
             IORInterceptor[] interceptors = OrbServices.GetSingleton().InterceptorManager.GetIorInterceptors();

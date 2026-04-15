@@ -29,8 +29,7 @@
 
 using System;
 using System.Collections;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Lifetime;
+using Ch.Elca.Iiop.Remoting;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop;
 using System.Reflection;

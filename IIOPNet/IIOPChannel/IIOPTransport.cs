@@ -28,9 +28,7 @@
  */
 
 using System;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using System.Collections;
 using System.Net.Sockets;
 using System.IO;
@@ -166,7 +164,7 @@ namespace Ch.Elca.Iiop {
             }                        
         }
 
-        public void AsyncProcessResponse(System.Runtime.Remoting.Channels.IClientResponseChannelSinkStack sinkStack, object state, System.Runtime.Remoting.Channels.ITransportHeaders headers, System.IO.Stream stream) {
+        public void AsyncProcessResponse(IClientResponseChannelSinkStack sinkStack, object state, ITransportHeaders headers, System.IO.Stream stream) {
             throw new NotSupportedException(); // this should not be called, because this sink is the first in the chain, receiving the response
         }
         

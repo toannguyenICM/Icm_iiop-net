@@ -31,7 +31,7 @@ using System;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Util;

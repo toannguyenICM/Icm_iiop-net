@@ -29,7 +29,7 @@
 
 
 using System;
-using System.Runtime.Remoting;
+using Ch.Elca.Iiop.Remoting;
 using System.Collections;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Idl;
@@ -840,7 +840,7 @@ namespace Ch.Elca.Iiop.Tests
 {
 
     using System.IO;
-    using System.Runtime.Remoting.Channels;
+    using Ch.Elca.Iiop.Remoting;
     using NUnit.Framework;
     using omg.org.CORBA;
     using Ch.Elca.Iiop.Services;

@@ -29,8 +29,7 @@
 
 using System;
 using System.ComponentModel;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
+using Ch.Elca.Iiop.Remoting;
 using System.Diagnostics;
 using System.Collections;
 using System.Reflection;
@@ -2066,7 +2065,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 namespace Ch.Elca.Iiop.Tests {
 
     using System.IO;
-    using System.Runtime.Remoting.Channels;
+    using Ch.Elca.Iiop.Remoting;
     using NUnit.Framework;
     using Ch.Elca.Iiop.Marshalling;
     using Ch.Elca.Iiop.Cdr;

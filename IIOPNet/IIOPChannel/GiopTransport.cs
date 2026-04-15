@@ -30,8 +30,7 @@
 using System;
 using System.IO;
 using System.Diagnostics;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using System.Threading;
 using System.Collections;
 using System.Collections.Specialized;

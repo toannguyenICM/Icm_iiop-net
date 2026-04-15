@@ -29,8 +29,7 @@
 
 using System;
 using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Util;

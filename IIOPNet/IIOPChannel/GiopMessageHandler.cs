@@ -28,9 +28,7 @@
  */
 
 using System;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Messaging;
-using System.Runtime.Remoting.Activation;
+using Ch.Elca.Iiop.Remoting;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
@@ -320,7 +318,7 @@ namespace Ch.Elca.Iiop.Tests {
     using System.Reflection;
     using System.Collections;
     using System.IO;
-    using System.Runtime.Remoting.Channels;
+    using Ch.Elca.Iiop.Remoting;
     using NUnit.Framework;
     using Ch.Elca.Iiop;
     using Ch.Elca.Iiop.Idl;

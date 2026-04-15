@@ -32,7 +32,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Collections;
 using System.Threading;
-using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.Remoting;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Services;
 using omg.org.CORBA;

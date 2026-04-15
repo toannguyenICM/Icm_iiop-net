@@ -30,8 +30,7 @@
 
 using System;
 using System.Collections;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
+using Ch.Elca.Iiop.Remoting;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.CorbaObjRef;
